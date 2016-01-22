@@ -24,7 +24,8 @@ sub new {
                                && $prop =~ /^(?:og:)?$basictype:.+$/));
             $prop =~ s/^og://;
             $basictype = $properties->{'_basictype'} if ! defined $basictype;
-            if ($basictype ne ''
+            if (defined $basictype
+                && $basictype ne ''
                 && $prop =~ /^(?:og:)?$basictype:.+$/) {
                 if ($prop =~ /^$basictype:.+$/) {
                     if (exists $properties->{$prop}) {
