@@ -29,7 +29,7 @@ sub new {
                 && $prop =~ /^(?:og:)?$basictype:.+$/) {
                 if ($prop =~ /^$basictype:.+$/) {
                     if (exists $properties->{$prop}) {
-                        if (reftype($properties->{$prop}) eq 'ARRAY') {
+                        if ((reftype($properties->{$prop}) // '') eq 'ARRAY') {
                             push @{$properties->{$prop}}, $content;
                         }
                         else {
