@@ -26,10 +26,12 @@ sub parse_string {
     $tree->parse($string);
     $tree->eof;
 
+    my %properties = ();
+
     my $og_type = $tree->findnodes('//meta[@property="og:type" and @content]');
     if (! defined($og_type)) {
 	$tree->delete;
-	return $self;
+	return \%properties;
     }
 
     # There appears to be a slight difference in return value depending on
@@ -42,10 +44,8 @@ sub parse_string {
     }
     else {
 	$tree->delete;
-	return $self;
+	return \%properties;
     }
-
-    my %properties = ();
 
     my $content = $og_type->attr('content');
     if ($content =~ /^([^.]+)\..+$/) {
@@ -85,7 +85,6 @@ sub parse_string {
     }
 
     $tree->delete;
-
     return \%properties;
 }
 
