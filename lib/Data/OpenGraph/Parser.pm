@@ -6,7 +6,7 @@ use Scalar::Util qw(reftype);
 sub new {
     my ($class, %args) = @_;
     my $self = bless {
-	libxml => ($args{libxml} // 1) ? 1 : undef
+        libxml => ($args{libxml} // 1) ? 1 : undef
     }, $class;
 }
 
@@ -15,12 +15,12 @@ sub parse_string {
 
     my $tree;
     if ($self->{libxml}) {
-	use HTML::TreeBuilder::LibXML;
-	$tree = HTML::TreeBuilder::LibXML->new();
+        use HTML::TreeBuilder::LibXML;
+        $tree = HTML::TreeBuilder::LibXML->new();
     }
     else {
-	use HTML::TreeBuilder::XPath;
-	$tree = HTML::TreeBuilder::XPath->new();
+        use HTML::TreeBuilder::XPath;
+        $tree = HTML::TreeBuilder::XPath->new();
     }
 
     $tree->parse($string);
@@ -30,58 +30,58 @@ sub parse_string {
 
     my $og_type = $tree->findnodes('//meta[@property="og:type" and @content]');
     if (! defined($og_type)) {
-	$tree->delete;
-	return \%properties;
+        $tree->delete;
+        return \%properties;
     }
 
     # There appears to be a slight difference in return value depending on
     # whether HTML::TreeBuilder::LibXML or HTML::TreeBuilder::XPath is used.
-    if (reftype($og_type) eq 'HASH') {
-	$og_type = $og_type->get_nodelist->get_node(0);
+    if (reftype($og_type) eq 'HASH' && scalar keys %$og_type) {
+        $og_type = $og_type->get_nodelist->get_node(0);
     }
-    elsif (reftype($og_type) eq 'ARRAY') {
-	$og_type = $og_type->[0];
+    elsif (reftype($og_type) eq 'ARRAY' && scalar @$og_type) {
+        $og_type = $og_type->[0];
     }
     else {
-	$tree->delete;
-	return \%properties;
+        $tree->delete;
+        return \%properties;
     }
 
     my $content = $og_type->attr('content');
     if ($content =~ /^([^.]+)\..+$/) {
-	$properties{'_basictype'} = $1;
+        $properties{'_basictype'} = $1;
     } else {
-	$properties{'_basictype'} = $content;
+        $properties{'_basictype'} = $content;
     }
     my $basictype = $properties{'_basictype'};
 
     my $metas = $tree->findnodes(
-	'//meta['
-	.'((starts-with(@property, "og:") and @property != "og:type")'
-	.' or starts-with(@property, "'.$basictype.':"))'
-	.'and @content'
-	.']');
+        '//meta['
+        .'((starts-with(@property, "og:") and @property != "og:type")'
+        .' or starts-with(@property, "'.$basictype.':"))'
+        .'and @content'
+        .']');
     for my $meta (@$metas) {
-	my $prop = $meta->attr('property');
-	$content = $meta->attr('content');
-	next unless $prop && $content;
-	$prop =~ s/^og://;
-	if ($prop =~ /^$basictype:.+$/) {
-	    if (exists $properties{$prop}) {
-		if ((reftype($properties{$prop}) // '') eq 'ARRAY') {
-		    push @{$properties{$prop}}, $content;
-		}
-		else {
-		    $properties{$prop} = [$properties{$prop}, $content];
-		}
-	    }
-	    else {
-		$properties{$prop} = $content;
-	    }
-	}
-	else {
-	    $properties{$prop} = $content;
-	}
+        my $prop = $meta->attr('property');
+        $content = $meta->attr('content');
+        next unless $prop && $content;
+        $prop =~ s/^og://;
+        if ($prop =~ /^$basictype:.+$/) {
+            if (exists $properties{$prop}) {
+                if ((reftype($properties{$prop}) // '') eq 'ARRAY') {
+                    push @{$properties{$prop}}, $content;
+                }
+                else {
+                    $properties{$prop} = [$properties{$prop}, $content];
+                }
+            }
+            else {
+                $properties{$prop} = $content;
+            }
+        }
+        else {
+            $properties{$prop} = $content;
+        }
     }
 
     $tree->delete;
