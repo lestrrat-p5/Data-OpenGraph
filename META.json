@@ -47,25 +47,26 @@
       },
       "runtime" : {
          "requires" : {
-            "HTML::Parser" : "3"
+            "HTML::TreeBuilder::LibXML" : "0"
          }
       }
    },
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/lestrrat/Data-OpenGraph/issues"
+         "web" : "https://github.com/lestrrat/p5-Data-OpenGraph/issues"
       },
-      "homepage" : "https://github.com/lestrrat/Data-OpenGraph",
+      "homepage" : "https://github.com/lestrrat/p5-Data-OpenGraph",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/lestrrat/Data-OpenGraph.git",
-         "web" : "https://github.com/lestrrat/Data-OpenGraph"
+         "url" : "git://github.com/lestrrat/p5-Data-OpenGraph.git",
+         "web" : "https://github.com/lestrrat/p5-Data-OpenGraph"
       }
    },
    "version" : "0.01",
    "x_authority" : "cpan:DMAKI",
    "x_contributors" : [
-      "lestrrat <lestrrat+github@gmail.com>"
+      "Daisuke Maki <lestrrat+github@gmail.com>",
+      "Vaclav Haisman <vhaisman@gmail.com>"
    ]
 }

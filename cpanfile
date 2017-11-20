@@ -1,4 +1,4 @@
-requires 'HTML::Parser', '3';
+requires 'HTML::TreeBuilder::LibXML';
 
 on build => sub {
     requires 'ExtUtils::MakeMaker', '6.36';
