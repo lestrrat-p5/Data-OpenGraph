@@ -25,4 +25,14 @@ EOM
     }
 };
 
+subtest 'nested-without-prefix' => sub {
+    my $og = Data::OpenGraph->parse_string(<<EOM);
+<meta property="og:type" content="audio">
+<meta property="audio:title" content="foo bar baz">
+EOM
+    if (not is $og->property("audio:title"), "foo bar baz") {
+        diag(Data::Dumper::Dumper($og));
+    }
+};
+
 done_testing;

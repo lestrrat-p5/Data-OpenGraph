@@ -1,6 +1,6 @@
 package Data::OpenGraph::Parser;
 use strict;
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype blessed);
 
 
 sub new {
@@ -29,36 +29,28 @@ sub parse_string {
     my %properties = ();
 
     my $og_type = $tree->findnodes('//meta[@property="og:type" and @content]');
-    if (! defined($og_type)) {
-        $tree->delete;
-        return \%properties;
+    if (defined($og_type)) {
+        $og_type = _unwrap_one_node($og_type);
     }
 
-    # There appears to be a slight difference in return value depending on
-    # whether HTML::TreeBuilder::LibXML or HTML::TreeBuilder::XPath is used.
-    if (reftype($og_type) eq 'HASH' && scalar keys %$og_type) {
-        $og_type = $og_type->get_nodelist->get_node(0);
-    }
-    elsif (reftype($og_type) eq 'ARRAY' && scalar @$og_type) {
-        $og_type = $og_type->[0];
-    }
-    else {
-        $tree->delete;
-        return \%properties;
-    }
-
-    my $content = $og_type->attr('content');
-    if ($content =~ /^([^.]+)\..+$/) {
-        $properties{'_basictype'} = $1;
-    } else {
-        $properties{'_basictype'} = $content;
+    my $content;
+    if (defined($og_type)
+        && ($content = $og_type->attr('content'))) {
+        $properties{'type'} = $content;
+        if ($content =~ /^([^.]+)\..+$/) {
+            $properties{'_basictype'} = $1;
+        } else {
+            $properties{'_basictype'} = $content;
+        }
     }
     my $basictype = $properties{'_basictype'};
 
     my $metas = $tree->findnodes(
         '//meta['
         .'((starts-with(@property, "og:") and @property != "og:type")'
-        .' or starts-with(@property, "'.$basictype.':"))'
+        .(defined($basictype)
+          ? ' or starts-with(@property, "'.$basictype.':")' : '')
+        .')'
         .'and @content'
         .']');
     for my $meta (@$metas) {
@@ -86,6 +78,32 @@ sub parse_string {
 
     $tree->delete;
     return \%properties;
+}
+
+sub _unwrap_one_node {
+    # There appears to be a slight difference in return value depending on
+    # whether HTML::TreeBuilder::LibXML or HTML::TreeBuilder::XPath is used.
+
+    my ($nodes_or_node,) = @_;
+    if (blessed($nodes_or_node)
+        && $nodes_or_node->isa('XML::XPathEngine::NodeSet')) {
+        if ($nodes_or_node->size()) {
+            return $nodes_or_node->get_node(0);
+        }
+        else {
+            return;
+        }
+    }
+    elsif (reftype($nodes_or_node) eq 'ARRAY') {
+        if (scalar @$nodes_or_node) {
+            return $nodes_or_node->[0];
+        }
+        else {
+            return;
+        }
+    }
+
+    return $nodes_or_node;
 }
 
 1;
