@@ -58,7 +58,7 @@ sub parse_string {
         $content = $meta->attr('content');
         next unless $prop && $content;
         $prop =~ s/^og://;
-        if ($prop =~ /^$basictype:.+$/) {
+        if (defined($basictype) && $prop =~ /^$basictype:.+$/) {
             if (exists $properties{$prop}) {
                 if ((reftype($properties{$prop}) // '') eq 'ARRAY') {
                     push @{$properties{$prop}}, $content;
